@@ -1,5 +1,3 @@
-.aws/
-bin*/
 .DS_Store
 certificates/
 *.cer
