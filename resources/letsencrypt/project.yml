@@ -1,0 +1,7 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  annotations:
+    openshift.io/description: "OpenShift ingress letsencrypt certificate renewal via acme.sh cronjob"
+    openshift.io/display-name: "Let's Encrypt"
+  name: letsencrypt

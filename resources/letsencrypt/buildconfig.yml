@@ -1,0 +1,52 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    build: letsencrypt
+  name: letsencrypt
+spec:
+  failedBuildsHistoryLimit: 5
+  output:
+    to:
+      kind: ImageStreamTag
+      name: letsencrypt:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    dockerfile: |-
+      FROM centos:7
+
+      COPY oc /usr/bin/oc
+
+      RUN yum update -y && \
+          yum install -y openssl && \
+          yum clean all
+      
+      RUN curl --silent \
+              'https://api.github.com/repos/acmesh-official/acme.sh/releases/latest' | \
+          grep '"tag_name":' | \
+          sed -E 's/.*"([^"]+)".*/\1/' | \
+          xargs -I {} curl -sOL 'https://github.com/acmesh-official/acme.sh/archive/'{}'.tar.gz' && \
+          mkdir -p /usr/local/bin/acme.sh && \
+          tar -xvf *.tar.gz  -C /usr/local/bin/acme.sh  --strip-components=1 && \
+          rm *.tar.gz
+
+      RUN mkdir -p /.acme.sh && \
+          chgrp -R 0 /.acme.sh && \
+          chmod -R g+rwx /.acme.sh
+    type: Dockerfile
+    images:
+      - from:
+          kind: DockerImage
+          name: >-
+            quay.io/openshift/origin-cli
+        as: null
+        paths:
+          - sourcePath: /usr/bin/oc
+            destinationDir: .
+  strategy:
+    dockerStrategy: {}
+    type: Docker
+  successfulBuildsHistoryLimit: 5
+ 

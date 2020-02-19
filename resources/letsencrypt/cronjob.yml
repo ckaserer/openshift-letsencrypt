@@ -1,0 +1,67 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: letsencrypt
+spec:
+  schedule: "0 0 */15 * 1"
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: letsencrypt
+          containers:
+            - resources: {}
+              name: letsencrypt
+              command:
+                - /usr/local/bin/letsencrypt-entrypoint.sh
+              env:
+                - name: TZ
+                  value: "Europe/Vienna"
+                - name: namespace
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: letsencrypt-aws-creds
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: letsencrypt-aws-creds
+                      key: AWS_SECRET_ACCESS_KEY
+              imagePullPolicy: Always
+              volumeMounts:
+                - name: scripts
+                  mountPath: /usr/local/bin/letsencrypt-entrypoint.sh
+                  subPath: letsencrypt-entrypoint.sh
+                - name: scripts
+                  mountPath: /usr/local/bin/letsencrypt-renew.sh
+                  subPath: letsencrypt-renew.sh
+                - name: scripts
+                  mountPath: /usr/local/bin/letsencrypt-install.sh
+                  subPath: letsencrypt-install.sh
+                - name: certs
+                  mountPath: /mnt/secret/letsencrypt-certs
+                - name: emptydir
+                  mountPath: /mnt/openshift
+              terminationMessagePolicy: File
+              image: "image-registry.openshift-image-registry.svc:5000/letsencrypt/letsencrypt"
+          serviceAccount: letsencrypt
+          volumes:
+            - name: scripts
+              configMap:
+                name: letsencrypt-scripts
+                defaultMode: 511
+            - name: certs
+              secret:
+                secretName: letsencrypt-certs
+                defaultMode: 500
+            - name: emptydir
+              emptydir: {}
