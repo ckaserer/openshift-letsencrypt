@@ -1,0 +1,6 @@
+.DS_Store
+certificates/
+*.cer
+*.csr
+*.csr.conf
+*.key
