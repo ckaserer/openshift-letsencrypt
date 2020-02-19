@@ -1,0 +1,23 @@
+version: "~> 1.0"
+os: linux
+language: shell
+services:
+- docker
+notifications:
+  email:
+    on_success: never
+    on_failure: never
+  slack:
+    rooms:
+      secure: rc9mBg7pSE54/9cwsHPJiEOJIKeUtC3OaMJF6xzmlSdPXvHhHpbb2C+KNvOXNGsu3HQv1wRBgz6oN6e6WPYzGwjLnZ21d3nMKXZvKND8HsBqUlC38vaP2aoky+/mqWrQ4TxVblk1hD7o52tRwtp3scqBG4mDq2xwX1+iTfJHC++0WrL23WeHO1MxwIVGeInkriNEouGZ707MqOSh15hmO7G9S7FoV8Mqzv0U5Oui6FQqSVUSEipFYS4a9wJ8KLwENXBHsWO6Jb0BaEQJT3PeMSC/gzh46BhpttVVtpclXZDbDNLB4jvIGjZSJxP8zKPr7uHlVIJOizmwNGxCcWj1mP87+v25h2Fc5WVuawRESZTh8Y4E8NkzFqnhXWCMt1rxv6E9pQjrLniRt7LTTCNCVyw2DHnY3HdLl2ED2ft2FxPNdXIQUpg0RVwhcBdId9NbwVhtUq7x2ISCW0+IlaM0GFZHVoWVBKJluN1sDo0lR4am25EIhgGdRSfgcR9OiNxCnIn/Doa5UjI0eAzPlRGtLg0MnhThK2N02jokx5ahwebJ1rahGHSLdmtIcY68IyfJGbCIYCby3fy99BWOCVFsuAGkVHrf9mXYCpYTEmimzLi9p8vFq2WTL+LE3l8QpuaYgX/OKNS0dwAevxZuRv+AkoyiACmUhw8BqHQ5GDVjdTE=
+    template:
+    - "%{commit_subject}"
+    - build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) @%{branch}
+    - by %{author} %{result} in %{duration}
+    on_success: always
+    on_failure: always
+script:
+- docker build -t gepardec/openshift-letsencrypt --no-cache .
+- docker run --rm -it gepardec/openshift-letsencrypt aws --version
+- echo -e "a\nb\nc\njson\n" | docker run --rm -i gepardec/openshift-letsencrypt aws-wrapper
+  configure list
