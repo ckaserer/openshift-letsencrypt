@@ -55,9 +55,6 @@ main () {
     case "$1" in
       --dns) 
         acme_options="${acme_options} --dns ${2}"
-        if [[ "${2}" == "dns_aws" ]]; then
-          execute "aws-wrapper configure list"
-        fi
         shift 2
         ;; 
       --staging) 
@@ -84,57 +81,39 @@ main () {
 
   ####
   # PREFLIGHT
+
+  if [[ ! -z ${ACME_HOME+x} ]]; then
+    acme_options="${acme_options} --home ${ACME_HOME}"
+  fi
   
   execute "mkdir -p ${certdir}"
-  execute "oc whoami" || echo "it seems you are not logged in to openshift"; exit 1
+  
+  execute "oc whoami -c"
 
   ####
   # CORE LOGIC
   
   # get openshift api domain name
-  execute "LE_API=\$(\
-              oc whoami --show-server | \
-              cut -f 2 -d ':' | \
-              cut -f 3 -d '/' | \
-              sed 's/-api././' \
-            )"
+  local le_api=$( \
+    oc whoami --show-server |
+    cut -f 2 -d ':' |
+    cut -f 3 -d '/' |
+    sed 's/-api././')
 
   # get openshift wildcard domain name
-  execute "LE_WILDCARD=\$(\
-              oc get ingresscontroller default \
-                -n openshift-ingress-operator \
-                -o jsonpath='{.status.domain}'\
-            )"
+  local le_wildcard=$( \
+    oc get ingresscontroller default \
+    -n openshift-ingress-operator \
+    -o jsonpath='{.status.domain}')
   
-  # extract AWS_ACCESS_KEY_ID from aws config file
-  execute "AWS_ACCESS_KEY_ID=\$(\
-              cat ~/.aws/credentials | \
-              grep 'aws_access_key_id = ' | \
-              sed 's/aws_access_key_id = //g'\
-            )"
-
-  # extract AWS_SECRET_ACCESS_KEY from aws config file
-  execute "AWS_SECRET_ACCESS_KEY=\$(\
-              cat ~/.aws/credentials | \
-              grep 'aws_secret_access_key = ' | \
-              sed 's/aws_secret_access_key = //g'\
-            )"
-
   # issue new certificate
-  execute " \
-    export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} && \
-    export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} && \
-    acme.sh \
-      --issue \
-      -d ${LE_API} \
-      -d *.${LE_WILDCARD} \
-      ${acme_options}"
+  execute "acme.sh --issue -d ${le_api} -d *.${le_wildcard} ${acme_options}"
   
   # Save certificates to host system
   execute "cp -R /root/.acme.sh/* ${certdir}"
 
   # Add creation timestamp
-  execute "date '+%Y%m%d%H%M' -d @\$(stat -c %Y /root/.acme.sh/${LE_API}/fullchain.cer) > ${certdir}/${LE_API}/timestamp"
+  execute "date '+%Y%m%d%H%M' -d @\$(stat -c %Y /root/.acme.sh/${le_api}/fullchain.cer) > ${certdir}/${le_api}/timestamp"
 }
  
 main $@

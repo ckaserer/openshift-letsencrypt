@@ -1,7 +1,9 @@
 FROM quay.io/openshift/origin-cli as OC
 FROM gepardec/awscli
 
-ENV PATH "$PATH:/usr/local/bin/acme.sh"
+ENV PATH="$PATH:/usr/local/bin/acme.sh" \
+    KUBECONFIG=/.kube/config \
+    ACME_HOME=/.acme.sh
 
 RUN curl --silent \
         'https://api.github.com/repos/acmesh-official/acme.sh/releases/latest' | \
@@ -11,9 +13,9 @@ RUN curl --silent \
     mkdir -p /usr/local/bin/acme.sh && \
     tar -xvf *.tar.gz  -C /usr/local/bin/acme.sh  --strip-components=1 && \
     rm *.tar.gz && \
-    mkdir -p /.acme.sh && \
-    chgrp -R 0 /.acme.sh && \
-    chmod -R g=u /.acme.sh
+    mkdir -p ${ACME_HOME} && \
+    chgrp -R 0 ${ACME_HOME} && \
+    chmod -R g=u ${ACME_HOME}
 
 COPY --from=OC /usr/bin/oc /usr/local/bin/oc
 COPY scripts/* /usr/local/bin/

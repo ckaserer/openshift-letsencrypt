@@ -18,7 +18,9 @@ FLAG_DRYRUN=false
 # SOURCE #
 ##########
 
-# source other bash scripts here
+for functionFile in ${SCRIPT_HOME}/bash-script-collection/functions/*.sh; do 
+  source ${functionFile}
+done
 
 ##########
 # SCRIPT #
@@ -27,6 +29,10 @@ FLAG_DRYRUN=false
 usage_message () {
   echo """Usage:
     $PROGNAME [OPT ..]
+      --dns)           ... wrapper for acme.sh --dns. e.g. '--dns dns_aws' to use the Amazon Route53 api
+      -f | --force)    ... used to force to install or force to renew a cert immediately
+      --staging)       ... use staging server, just for test. 
+      
       -d | --dryrun)   ... dryrun
       
       -h | --help)     ... help"""
@@ -34,32 +40,13 @@ usage_message () {
 readonly -f usage_message
 [ "$?" -eq "0" ] || return $?
 
-
-# execute $COMMAND [$DRYRUN=false]
-# if command and dryrun=true are provided the command will be execuded
-# if command and dryrun=false (or no second argument is provided) 
-# the function will only print the command the command to stdout
-execute () {
-  local exec_command=$1
-  local flag_dryrun=${2:-$FLAG_DRYRUN}
-
-  if [[ "${flag_dryrun}" == false ]]; then
-     echo "+ ${exec_command}"
-     eval "${exec_command}"
-  else
-    echo "${exec_command}"
-  fi
-}
-# readonly definition of a function throws an error if another function 
-# with the same name is defined a second time
-readonly -f execute
-[ "$?" -eq "0" ] || return $?
-
 main () {
   # INITIAL VALUES
+  local certdir=/mnt/openshift/certificates
+  local acme_options=""
 
   # GETOPT
-  OPTS=`getopt -o dh --long dryrun,help -- "$@"`
+  OPTS=`getopt -o dhf --long dryrun,help,force,staging,dns: -- "$@"`
   if [ $? != 0 ]; then
     print_stderr "failed to fetch options via getopt"
     exit $EXIT_FAILURE
@@ -67,6 +54,18 @@ main () {
   eval set -- "$OPTS"
   while true ; do
     case "$1" in
+      --dns) 
+        acme_options="${acme_options} --dns ${2}"
+        shift 2
+        ;; 
+      -f | --force) 
+        acme_options="${acme_options} --force";
+        shift;
+        ;; 
+      --staging) 
+        acme_options="${acme_options} --staging"
+        shift
+        ;; 
       -d | --dryrun) 
         FLAG_DRYRUN=true;
         shift;
@@ -86,25 +85,33 @@ main () {
   # check if all required options are given
 
   ####
-  # CORE LOGIC
-  execute "command -v oc 2&>/dev/null || export PATH=$PATH:${SCRIPT_PARENT_DIR}/bin"
-  if [[ -f ${SCRIPT_PARENT_DIR}/install-config/auth/kubeconfig ]]; then
-    execute "export KUBECONFIG=${SCRIPT_PARENT_DIR}/install-config/auth/kubeconfig"
-  fi
-
-  execute "oc whoami"
+  # PREFLIGHT
   
-  LE_API=$(oc whoami --show-server | cut -f 2 -d ':' | cut -f 3 -d '/' | sed 's/-api././')
-  LE_WILDCARD=$(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
-  CERTDIR=/mnt/openshift/certificates
+  if [[ ! -z ${ACME_HOME+x} ]]; then
+    acme_options="${acme_options} --home ${ACME_HOME}"
+  fi
+  
+  execute "oc whoami -c"
+
+  ####
+  # CORE LOGIC
+  
+  # get openshift api domain name
+  local le_api=$(\
+    oc whoami --show-server |
+    cut -f 2 -d ':' |
+    cut -f 3 -d '/' |
+    sed 's/-api././')
+
+  # get openshift wildcard domain name
+  local le_wildcard=$(\
+    oc get ingresscontroller default \
+    -n openshift-ingress-operator \
+    -o jsonpath='{.status.domain}')
   
   execute """
-    if [[ -f ~/.aws/credentials ]]; then
-      export AWS_ACCESS_KEY_ID=\$(cat ~/.aws/credentials | /usr/bin/grep 'aws_access_key_id = ' | sed 's/aws_access_key_id = //g')
-      export AWS_SECRET_ACCESS_KEY=\$(cat ~/.aws/credentials | /usr/bin/grep 'aws_secret_access_key = ' | sed 's/aws_secret_access_key = //g')
-    fi
-    ${SCRIPT_HOME}/acme.sh/acme.sh --renew --dns dns_aws -d ${LE_API} --cert-home ${CERTDIR} && \
-    date '+%Y%m%d%H%M' -d @\$(stat -c %Y ${CERTDIR}/${LE_API}/fullchain.cer) > ${CERTDIR}/${LE_API}/timestamp
+    acme.sh --renew -d ${le_api} --cert-home ${certdir} ${acme_options} &&
+    date '+%Y%m%d%H%M' -d @\$(stat -c %Y ${certdir}/${le_api}/fullchain.cer) > ${certdir}/${le_api}/timestamp
   """  
 }
  

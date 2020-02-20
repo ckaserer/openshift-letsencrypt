@@ -18,7 +18,9 @@ FLAG_DRYRUN=false
 # SOURCE #
 ##########
 
-# source other bash scripts here
+for functionFile in ${SCRIPT_HOME}/bash-script-collection/functions/*.sh; do 
+  source ${functionFile}
+done
 
 ##########
 # SCRIPT #
@@ -37,27 +39,6 @@ usage_message () {
 readonly -f usage_message
 [ "$?" -eq "0" ] || return $?
 
-
-# execute $COMMAND [$DRYRUN=false]
-# if command and dryrun=true are provided the command will be execuded
-# if command and dryrun=false (or no second argument is provided) 
-# the function will only print the command the command to stdout
-execute () {
-  local exec_command=${1}
-  local flag_dryrun=${2:-$FLAG_DRYRUN}
-
-  if [[ "${flag_dryrun}" == false ]]; then
-     echo "+ ${exec_command}" | xargs echo
-     eval "${exec_command}"
-  else
-    echo "${exec_command}" | xargs echo
-  fi
-}
-# readonly definition of a function throws an error if another function 
-# with the same name is defined a second time
-readonly -f execute
-[ "$?" -eq "0" ] || return $?
-
 main () {
   # INITIAL VALUES
   local project="letsencrypt"
@@ -65,7 +46,7 @@ main () {
   local flag_force=false
 
   # GETOPT
-  OPTS=`getopt -o dhs:r:c:f --long dryrun,help,,serviceaccount:,rolename:,cronjob:,force -- "$@"`
+  OPTS=`getopt -o dhs:r:c:f --long dryrun,help,serviceaccount:,rolename:,cronjob:,force -- "$@"`
   if [ $? != 0 ]; then
     echo "failed to fetch options via getopt"
     exit $EXIT_FAILURE
@@ -112,14 +93,13 @@ main () {
   # check if all required options are given
 
   ####
+  # PREFLIGHT
+   
+  execute "oc whoami -c"
+ 
+  ####
   # CORE LOGIC
 
-  execute "command -v oc 2&>0 || export PATH=$PATH:${SCRIPT_PARENT_DIR}/bin"
-  if [[ -f ${SCRIPT_PARENT_DIR}/install-config/auth/kubeconfig ]]; then
-    execute "export KUBECONFIG=${SCRIPT_PARENT_DIR}/install-config/auth/kubeconfig"
-  fi
-  execute "oc whoami"
- 
   # project
   if oc get \
         -n ${project} \
