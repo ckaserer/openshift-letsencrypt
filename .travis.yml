@@ -17,7 +17,6 @@ notifications:
     on_success: always
     on_failure: always
 script:
-- docker build -t gepardec/openshift-letsencrypt --no-cache .
 - docker run --rm -it gepardec/openshift-letsencrypt aws --version
 - echo -e "a\nb\nc\njson\n" | docker run --rm -i gepardec/openshift-letsencrypt aws-wrapper
   configure list
