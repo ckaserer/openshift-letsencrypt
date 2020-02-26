@@ -110,10 +110,10 @@ main () {
   execute "acme.sh --issue -d ${le_api} -d *.${le_wildcard} ${acme_options}"
   
   # Save certificates to host system
-  execute "cp -R /root/.acme.sh/* ${certdir}"
+  execute "cp -R /.acme.sh/* ${certdir}"
 
   # Add creation timestamp
-  execute "date '+%Y%m%d%H%M' -d @\$(stat -c %Y /root/.acme.sh/${le_api}/fullchain.cer) > ${certdir}/${le_api}/timestamp"
+  execute "date '+%Y%m%d%H%M' -d @\$(stat -c %Y /.acme.sh/${le_api}/fullchain.cer) > ${certdir}/${le_api}/timestamp"
 }
  
 main $@

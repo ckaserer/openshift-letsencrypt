@@ -136,30 +136,6 @@ main () {
         -f ${SCRIPT_PARENT_DIR}/resources/letsencrypt/imagestream-letsencrypt.yml"
   fi
 
-  # buildconfig
-  if [[ ${flag_force} == true ]]; then
-    execute "\
-      oc delete \
-        -n ${project} \
-        -f ${SCRIPT_PARENT_DIR}/resources/letsencrypt/buildconfig.yml \
-        --wait=true \
-        2>/dev/null"
-  fi
-  if oc get \
-      -n ${project} \
-      -f ${SCRIPT_PARENT_DIR}/resources/letsencrypt/buildconfig.yml \
-      >/dev/null \
-      2>&1; then
-    echo "buildconfig/letsencrypt exists"
-  else
-    execute "\
-      oc create \
-        -n ${project} \
-        -f ${SCRIPT_PARENT_DIR}/resources/letsencrypt/buildconfig.yml && \
-      oc start-build letsencrypt \
-        -n ${project}"
-  fi
-
   # serviceaccount
   if [[ ${flag_force} == true ]]; then
     execute "\
@@ -344,9 +320,9 @@ main () {
     execute "\
       oc create configmap letsencrypt-scripts \
         -n ${project} \
-        --from-file=/mnt/openshift/scripts/letsencrypt-entrypoint.sh \
-        --from-file=/mnt/openshift/scripts/letsencrypt-renew.sh \
-        --from-file=/mnt/openshift/scripts/letsencrypt-install.sh"
+        --from-file=/mnt/openshift/scripts/letsencrypt-entrypoint \
+        --from-file=/mnt/openshift/scripts/letsencrypt-renew \
+        --from-file=/mnt/openshift/scripts/letsencrypt-install"
   fi
   
   # cronjob

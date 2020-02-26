@@ -7,3 +7,13 @@ metadata:
 spec:
   lookupPolicy:
     local: false
+  tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: gepardec/openshift-letsencrypt
+      generation: 1
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
