@@ -105,7 +105,7 @@ main () {
   fi
   
   # renew certificates
-  execute "${SCRIPT_HOME}/letsencrypt-renew.sh"
+  execute "${SCRIPT_HOME}/letsencrypt-renew.sh --dns dns_aws"
   
   # update letsencrypt-certs secret
   local from_file=""
