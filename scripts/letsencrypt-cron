@@ -274,8 +274,8 @@ main () {
     execute "\
       oc create secret generic letsencrypt-aws-creds \
         -n ${project} \
-        --from-literal=AWS_ACCESS_KEY_ID=\$(cat ~/.aws/credentials | /usr/bin/grep 'aws_access_key_id = ' | sed 's/aws_access_key_id = //g') \
-        --from-literal=AWS_SECRET_ACCESS_KEY=\$(cat ~/.aws/credentials | /usr/bin/grep 'aws_secret_access_key = ' | sed 's/aws_secret_access_key = //g')"
+        --from-literal=AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+        --from-literal=AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
   fi 
 
   # certificates
