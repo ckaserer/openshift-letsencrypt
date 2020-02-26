@@ -129,17 +129,86 @@ To renew a new certificte for your OpenShift cluster you need to be logged in wi
 openshift-letsencrypt-renew --dns dns_aws
 ```
 
+## Cronjob in OpenShift to renew certificates
 
-<!--
-## Create a cronjob to automatically renew your certificate
-## All in one
-## Build the docker image
-## Repository folder structur
-## Container folder structure
+In order to automate the process of certificate renewal a cronjob can be deployed within openshift to check certificate health, renew certificates and install new certificates if necessary.
+
+**Disclaimer:** cronjob currently only supports aws as dns backend.
+
+```
+openshift-letsencrypt-cron
+```
+
+## Build the container image locally
+
+The image is available on dockerhub via gepardec/openshift-letsencrypt. If you want to build it locally or modify the image you can execute the build easily via
+
+```
+openshift-letsencrypt-build
+```
 
 ---
 
+## Repository folder structure
+
+```
+/
+├── CODE_OF_CONDUCT.md
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── bashrc
+├── resources
+│   └── letsencrypt
+│       ├── cronjob.yml
+│       ├── imagestream-letsencrypt.yml
+│       ├── project.yml
+│       ├── role-openshift-ingress-operator.yml
+│       ├── role-openshift-ingress.yml
+│       ├── role-project.yml
+│       └── serviceaccount.yml
+└── scripts
+    ├── bash-script-collection
+    │   └── functions
+    │       ├── check_for_pull_request.sh
+    │       ├── cmp_regex.sh
+    │       ├── docker_login.sh
+    │       ├── echo_stderr.sh
+    │       └── execute.sh
+    ├── letsencrypt-cron
+    ├── letsencrypt-entrypoint
+    ├── letsencrypt-install
+    ├── letsencrypt-issue
+    └── letsencrypt-renew
+```
+
+## Container folder structure
+
+```
+/
+├── usr/local/bin
+│   ├── acme.sh/acme.sh
+│   ├── aws
+│   ├── functions
+│   │   ├── check_for_pull_request.sh
+│   │   ├── cmp_regex.sh
+│   │   ├── docker_login.sh
+│   │   ├── echo_stderr.sh
+│   │   └── execute.sh
+│   ├── googlechat-send-notification.sh
+│   ├── jp.py
+│   ├── letsencrypt-cron
+│   ├── letsencrypt-entrypoint
+│   ├── letsencrypt-install
+│   ├── letsencrypt-issue
+│   ├── letsencrypt-renew
+│   └── oc
+└── mnt
+    └── openshift          <- Repo folder structure
+```
+
+---
 ### Sources:
 
-* 
--->
+* https://letsencrypt.org/
+* https://github.com/acmesh-official/acme.sh
