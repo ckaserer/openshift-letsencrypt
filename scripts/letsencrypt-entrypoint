@@ -105,7 +105,7 @@ main () {
   fi
   
   # renew certificates
-  execute "${SCRIPT_HOME}/letsencrypt-renew.sh --dns dns_aws"
+  execute "${SCRIPT_HOME}/letsencrypt-renew --dns dns_aws"
   
   # update letsencrypt-certs secret
   local from_file=""
@@ -120,7 +120,7 @@ main () {
            oc apply -f -"
   
   # update ingress
-  execute "${SCRIPT_HOME}/letsencrypt-install.sh"
+  execute "${SCRIPT_HOME}/letsencrypt-install"
 }
 
 main $@

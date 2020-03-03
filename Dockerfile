@@ -18,7 +18,7 @@ RUN curl --silent \
     chmod -R g=u ${ACME_HOME}
 
 COPY --from=OC /usr/bin/oc /usr/local/bin/oc
-COPY scripts/* /usr/local/bin/
+COPY scripts/ /usr/local/bin/
 COPY resources /opt/openshift/resources
 
 RUN chgrp -R 0 /usr/bin /opt/openshift && \

@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: letsencrypt
 spec:
-  schedule: "0 0 */15 * 1"
+  schedule: "15 8 1-7,15-22 * 6"
   concurrencyPolicy: Forbid
   suspend: false
   jobTemplate:
@@ -18,7 +18,7 @@ spec:
             - resources: {}
               name: letsencrypt
               command:
-                - /usr/local/bin/letsencrypt-entrypoint.sh
+                - /usr/local/bin/letsencrypt-entrypoint
               env:
                 - name: TZ
                   value: "Europe/Vienna"
@@ -39,14 +39,14 @@ spec:
               imagePullPolicy: Always
               volumeMounts:
                 - name: scripts
-                  mountPath: /usr/local/bin/letsencrypt-entrypoint.sh
-                  subPath: letsencrypt-entrypoint.sh
+                  mountPath: /usr/local/bin/letsencrypt-entrypoint
+                  subPath: letsencrypt-entrypoint
                 - name: scripts
-                  mountPath: /usr/local/bin/letsencrypt-renew.sh
-                  subPath: letsencrypt-renew.sh
+                  mountPath: /usr/local/bin/letsencrypt-renew
+                  subPath: letsencrypt-renew
                 - name: scripts
-                  mountPath: /usr/local/bin/letsencrypt-install.sh
-                  subPath: letsencrypt-install.sh
+                  mountPath: /usr/local/bin/letsencrypt-install
+                  subPath: letsencrypt-install
                 - name: certs
                   mountPath: /mnt/secret/letsencrypt-certs
                 - name: emptydir
