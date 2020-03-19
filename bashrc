@@ -42,11 +42,11 @@ function openshift-letsencrypt () {
       -v $(echo ~)/.kube/:/.kube:ro \
       -e AWS_ACCESS_KEY_ID=$( \
           cat ~/.aws/credentials 2>/dev/null |
-          /usr/bin/grep 'aws_access_key_id = ' |
+          grep 'aws_access_key_id = ' |
           sed 's/aws_access_key_id = //g') \
       -e AWS_SECRET_ACCESS_KEY=$( \
           cat ~/.aws/credentials 2>/dev/null |
-          /usr/bin/grep 'aws_secret_access_key = ' |
+          grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt $*"
 }
@@ -69,11 +69,11 @@ function openshift-letsencrypt-issue () {
       -v $(echo ~)/.kube/:/.kube:ro \
       -e AWS_ACCESS_KEY_ID=$( \
           cat ~/.aws/credentials |
-          /usr/bin/grep 'aws_access_key_id = ' |
+          grep 'aws_access_key_id = ' |
           sed 's/aws_access_key_id = //g') \
       -e AWS_SECRET_ACCESS_KEY=$( \
           cat ~/.aws/credentials |
-          /usr/bin/grep 'aws_secret_access_key = ' |
+          grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt \
       /mnt/openshift/helm/files/scripts/letsencrypt-issue $*"
@@ -103,11 +103,11 @@ function openshift-letsencrypt-renew () {
       -v $(echo ~)/.kube/:/.kube:ro \
       -e AWS_ACCESS_KEY_ID=$( \
           cat ~/.aws/credentials |
-          /usr/bin/grep 'aws_access_key_id = ' |
+          grep 'aws_access_key_id = ' |
           sed 's/aws_access_key_id = //g') \
       -e AWS_SECRET_ACCESS_KEY=$( \
           cat ~/.aws/credentials |
-          /usr/bin/grep 'aws_secret_access_key = ' |
+          grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt \
       /mnt/openshift/helm/files/scripts/letsencrypt-renew $*"
@@ -124,11 +124,11 @@ function openshift-letsencrypt-cron () {
       -v $(echo ~)/.kube/:/.kube:ro \
       -e AWS_ACCESS_KEY_ID=$( \
           cat ~/.aws/credentials |
-          /usr/bin/grep 'aws_access_key_id = ' |
+          grep 'aws_access_key_id = ' |
           sed 's/aws_access_key_id = //g') \
       -e AWS_SECRET_ACCESS_KEY=$( \
           cat ~/.aws/credentials |
-          /usr/bin/grep 'aws_secret_access_key = ' |
+          grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt \
       /mnt/openshift/helm/files/scripts/letsencrypt-cron $*"
