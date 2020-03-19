@@ -20,3 +20,6 @@ script:
 - docker run --rm -it gepardec/openshift-letsencrypt aws --version
 - echo -e "a\nb\nc\njson\n" | docker run --rm -i gepardec/openshift-letsencrypt aws-wrapper
   configure list
+- docker run --rm -it gepardec/openshift-letsencrypt helm version
+- source bashrc && openshift-letsencrypt helm template /mnt/openshift/helm/ 
+

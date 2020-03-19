@@ -76,7 +76,7 @@ function openshift-letsencrypt-issue () {
           /usr/bin/grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt \
-      /mnt/openshift/scripts/letsencrypt-issue $*"
+      /mnt/openshift/helm/files/scripts/letsencrypt-issue $*"
 }
 readonly -f openshift-letsencrypt-issue
 [ "$?" -eq "0" ] || return $?
@@ -89,7 +89,7 @@ function openshift-letsencrypt-install () {
       -v ${OPENSHIFT_LETSENCRYPT_HOME}:/mnt/openshift \
       -v $(echo ~)/.kube/:/.kube:ro \
       gepardec/openshift-letsencrypt \
-      /mnt/openshift/scripts/letsencrypt-install $*"
+      /mnt/openshift/helm/files/scripts/letsencrypt-install $*"
 }
 readonly -f openshift-letsencrypt-install
 [ "$?" -eq "0" ] || return $?
@@ -110,7 +110,7 @@ function openshift-letsencrypt-renew () {
           /usr/bin/grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt \
-      /mnt/openshift/scripts/letsencrypt-renew $*"
+      /mnt/openshift/helm/files/scripts/letsencrypt-renew $*"
 }
 readonly -f openshift-letsencrypt-renew
 [ "$?" -eq "0" ] || return $?
@@ -131,7 +131,7 @@ function openshift-letsencrypt-cron () {
           /usr/bin/grep 'aws_secret_access_key = ' |
           sed 's/aws_secret_access_key = //g') \
       gepardec/openshift-letsencrypt \
-      /mnt/openshift/scripts/letsencrypt-cron $*"
+      /mnt/openshift/helm/files/scripts/letsencrypt-cron $*"
 }
 readonly -f openshift-letsencrypt-cron
 [ "$?" -eq "0" ] || return $?

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: letsencrypt-scripts
+  labels:
+    app: letsencrypt
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    helm.sh/appVersion: "{{ .Chart.AppVersion }}"
+    helm.sh/revision: "{{ .Release.Revision }}"
+data:
+{{ (.Files.Glob "files/scripts/letsencrypt-entrypoint").AsConfig | indent 2 }}
+{{ (.Files.Glob "files/scripts/letsencrypt-renew").AsConfig | indent 2 }}
+{{ (.Files.Glob "files/scripts/letsencrypt-install").AsConfig | indent 2 }}

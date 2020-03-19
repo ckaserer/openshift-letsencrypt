@@ -29,6 +29,10 @@ done
 usage_message () {
   echo """Usage:
     $PROGNAME [OPT ..]
+      --dns)           ... wrapper for acme.sh --dns. e.g. '--dns dns_aws' to use the Amazon Route53 api
+      -f | --force)    ... used to force to install or force to renew a cert immediately
+      --staging)       ... use staging server, just for test. 
+      
       -d | --dryrun)   ... dryrun
       
       -h | --help)     ... help"""
@@ -38,10 +42,11 @@ readonly -f usage_message
 
 main () {
   # INITIAL VALUES
-  local certdir=/mnt/openshift/certificates
+  local certdir=/mnt/openshift/helm/files/certificates
+  local acme_options=""
 
   # GETOPT
-  OPTS=`getopt -o dh --long dryrun,help -- "$@"`
+  OPTS=`getopt -o dhf --long dryrun,help,force,staging,dns: -- "$@"`
   if [ $? != 0 ]; then
     print_stderr "failed to fetch options via getopt"
     exit $EXIT_FAILURE
@@ -49,6 +54,18 @@ main () {
   eval set -- "$OPTS"
   while true ; do
     case "$1" in
+      --dns) 
+        acme_options="${acme_options} --dns ${2}"
+        shift 2
+        ;; 
+      -f | --force) 
+        acme_options="${acme_options} --force";
+        shift;
+        ;; 
+      --staging) 
+        acme_options="${acme_options} --staging"
+        shift
+        ;; 
       -d | --dryrun) 
         FLAG_DRYRUN=true;
         shift;
@@ -70,48 +87,32 @@ main () {
   ####
   # PREFLIGHT
   
-  execute "oc whoami -c" 
+  if [[ ! -z ${ACME_HOME+x} ]]; then
+    acme_options="${acme_options} --home ${ACME_HOME}"
+  fi
   
+  execute "oc whoami -c"
+
   ####
   # CORE LOGIC
   
   # get openshift api domain name
-  local le_api=$( \
+  local le_api=$(\
     oc whoami --show-server |
     cut -f 2 -d ':' |
     cut -f 3 -d '/' |
     sed 's/-api././')
 
-  # get certificate creation timestamp
-  local timestamp=$(cat ${certdir}/${le_api}/timestamp || date '+%Y%m%d%H%M')
-  execute "echo timestamp=${timestamp}"
-
-  # if certificate is already present in openshift do nothing
-  if oc get secret router-certs-${timestamp} \
-      -n openshift-ingress \
-      >/dev/null \
-      2>&1; then
-    echo "no certificate update required"
-  else
-    execute "oc label secrets \
-      -n openshift-ingress \
-      -l letsencrypt=true \
-      --overwrite delete=me"
-    execute "oc delete secrets \
-      -n openshift-ingress \
-      -l letsencrypt=true"
-    execute "oc create secret tls router-certs-${timestamp} \
-      -n openshift-ingress \
-      --cert=${certdir}/${le_api}/fullchain.cer \
-      --key=${certdir}/${le_api}/${le_api}.key"
-    execute "oc label secrets router-certs-${timestamp} \
-       -n openshift-ingress \
-       letsencrypt=true"    
-    execute "oc patch ingresscontroller default \
-       -n openshift-ingress-operator \
-       --type=merge \
-       --patch='{\"spec\": { \"defaultCertificate\": { \"name\": \"router-certs-${timestamp}\" }}}'"
-  fi
+  # get openshift wildcard domain name
+  local le_wildcard=$(\
+    oc get ingresscontroller default \
+    -n openshift-ingress-operator \
+    -o jsonpath='{.status.domain}')
+  
+  execute """
+    acme.sh --renew -d ${le_api} --cert-home ${certdir} ${acme_options} &&
+    date '+%Y%m%d%H%M' -d @\$(stat -c %Y ${certdir}/${le_api}/fullchain.cer) > ${certdir}/${le_api}/timestamp
+  """  
 }
  
 main $@

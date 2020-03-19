@@ -98,10 +98,10 @@ main () {
   execute "oc whoami -c"
 
   LE_API=$(oc whoami --show-server | cut -f 2 -d ':' | cut -f 3 -d '/' | sed 's/-api././')
-  execute "mkdir -p /mnt/openshift/certificates/${LE_API}"
-  execute "cp /mnt/secret/letsencrypt-certs/* /mnt/openshift/certificates/${LE_API}/"
-  if [[ ! -f /mnt/openshift/certificates/${LE_API}/timestamp ]]; then
-    execute "date '+%Y%m%d%H%M' > /mnt/openshift/certificates/${LE_API}/timestamp"
+  execute "mkdir -p /mnt/openshift/helm/files/certificates/${LE_API}"
+  execute "cp /mnt/secret/letsencrypt-certs/* /mnt/openshift/helm/files/certificates/${LE_API}/"
+  if [[ ! -f /mnt/openshift/helm/files/certificates/${LE_API}/timestamp ]]; then
+    execute "date '+%Y%m%d%H%M' > /mnt/openshift/helm/files/certificates/${LE_API}/timestamp"
   fi
   
   # renew certificates
@@ -109,7 +109,7 @@ main () {
   
   # update letsencrypt-certs secret
   local from_file=""
-  for item in $(find /mnt/openshift/certificates/${LE_API}/ -type f); do
+  for item in $(find /mnt/openshift/helm/files/certificates/${LE_API}/ -type f); do
     from_file="${from_file} --from-file=${item}"
   done
   execute "oc create secret generic letsencrypt-certs \

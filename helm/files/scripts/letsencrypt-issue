@@ -42,7 +42,7 @@ readonly -f usage_message
 main () {
   # INITIAL VALUES
   local acme_options=""
-  local certdir=/mnt/openshift/certificates
+  local certdir=/mnt/openshift/helm/files/certificates
   
   # GETOPT
   OPTS=`getopt -o dh --long dryrun,help,dns:,staging -- "$@"`

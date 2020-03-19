@@ -18,8 +18,10 @@ RUN curl --silent \
     chmod -R g=u ${ACME_HOME}
 
 COPY --from=OC /usr/bin/oc /usr/local/bin/oc
-COPY scripts/ /usr/local/bin/
+RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+COPY helm/files/scripts/ /usr/local/bin/
 COPY resources /opt/openshift/resources
+COPY helm /opt/openshift/helm
 
 RUN chgrp -R 0 /usr/bin /opt/openshift && \
     chmod -R g=u /usr/bin /opt/openshift

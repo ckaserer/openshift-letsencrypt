@@ -4,11 +4,12 @@ metadata:
   labels:
     app: letsencrypt
   name: letsencrypt
+  namespace: openshift-ingress
 rules:
 - apiGroups:
-  - "operator.openshift.io"
+  - ""
   resources:
-  - ingresscontrollers
+  - secrets
   verbs:
   - create
   - get
