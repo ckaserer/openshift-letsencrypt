@@ -14,7 +14,7 @@ notifications:
     - "%{commit_subject}"
     - build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) @%{branch}
     - by %{author} %{result} in %{duration}
-    on_success: always
+    on_success: change
     on_failure: always
 script:
 - docker run --rm -it gepardec/openshift-letsencrypt aws --version
