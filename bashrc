@@ -16,7 +16,7 @@ FLAG_DRYRUN=false
 # SOURCE #
 ##########
 
-for functionFile in ${SCRIPT_HOME}/bash-script-collection/functions/*.sh; do 
+for functionFile in ${OPENSHIFT_LETSENCRYPT_HOME}/helm/files/scripts/bash-script-collection/functions/*.sh; do 
   source ${functionFile} >/dev/null 2>&1
 done
 
