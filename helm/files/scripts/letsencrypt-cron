@@ -114,12 +114,12 @@ main () {
         -f ${SCRIPT_PARENT_DIR}/resources/letsencrypt/project.yml"
   fi
 
-  execute "helm install openshift-letsencryt \
+  execute "helm install openshift-letsencrypt \
       ${SCRIPT_PARENT_DIR}/helm \
       -n letsencrypt \
       --set AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
       --set AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} || \
-    helm upgrade openshift-letsencryt \
+    helm upgrade openshift-letsencrypt \
       ${SCRIPT_PARENT_DIR}/helm \
       -n letsencrypt \
       --set AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \

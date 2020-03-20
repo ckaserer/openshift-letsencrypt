@@ -64,4 +64,4 @@ spec:
                 secretName: letsencrypt-certs
                 defaultMode: 500
             - name: emptydir
-              emptydir: {}
+              emptyDir: {}
